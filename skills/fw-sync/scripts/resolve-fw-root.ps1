@@ -1,0 +1,50 @@
+# Resolve the physical FWS source before looking for its sibling workspace.
+# Resolve-Path alone preserves Windows junction ancestors, including installed
+# skill links such as <client>/skills/fw-sync -> <FW>/fws/skills/fw-sync.
+function Resolve-FwsPhysicalDirectory {
+    param([string]$Directory)
+    $full = (Resolve-Path -LiteralPath $Directory).Path
+    $visited = @{}
+    for ($depth = 0; $depth -lt 32; $depth++) {
+        if ($visited.ContainsKey($full)) { throw 'Cyclic skill/workspace directory link.' }
+        $visited[$full] = $true
+        $cursor = $full
+        $redirected = $false
+        while ($cursor) {
+            $item = Get-Item -LiteralPath $cursor -Force
+            if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+                $targets = @($item.Target)
+                if ($targets.Count -ne 1 -or [string]::IsNullOrWhiteSpace($targets[0])) { throw "Cannot resolve directory link: $cursor" }
+                $target = $targets[0]
+                if ($target.StartsWith('\??\')) { $target = $target.Substring(4) }
+                if (-not [System.IO.Path]::IsPathRooted($target)) { $target = Join-Path (Split-Path -Parent $cursor) $target }
+                $suffix = $full.Substring($cursor.TrimEnd('\', '/').Length).TrimStart('\', '/')
+                $next = if ($suffix) { Join-Path $target $suffix } else { $target }
+                $full = (Resolve-Path -LiteralPath $next).Path
+                $redirected = $true
+                break
+            }
+            $parent = Split-Path -Parent $cursor
+            if ($parent -eq $cursor) { break }
+            $cursor = $parent
+        }
+        if (-not $redirected) { return $full }
+    }
+    throw 'Too many skill/workspace directory links.'
+}
+
+function Resolve-FwsWorkspaceRoot {
+    param([string]$ExplicitPath, [switch]$HasExplicitPath)
+    $candidate = if ($HasExplicitPath) { $ExplicitPath }
+        elseif (-not [string]::IsNullOrWhiteSpace($env:FW_HOME)) { $env:FW_HOME }
+        else { Join-Path (Resolve-FwsPhysicalDirectory -Directory $PSScriptRoot) '../../../..' }
+    if ([string]::IsNullOrWhiteSpace($candidate)) { throw 'FW location is empty.' }
+    $resolved = Resolve-FwsPhysicalDirectory -Directory $candidate
+    $package = Get-Content -Raw -LiteralPath (Join-Path $resolved 'package.json') | ConvertFrom-Json
+    if (-not $package.PSObject.Properties['name'] -or -not $package.PSObject.Properties['fwWorkspace'] -or
+        $package.name -ne 'fw' -or $package.fwWorkspace -ne $true -or
+        -not (Test-Path -LiteralPath (Join-Path $resolved 'tools/sync.ps1') -PathType Leaf)) {
+        throw 'Expected the FW workspace package (name=fw, fwWorkspace=true) with tools/sync.ps1.'
+    }
+    return $resolved
+}

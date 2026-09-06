@@ -4,12 +4,13 @@
 
 | 仓库 | 职责 |
 |---|---|
+| FW | 顶层项目初始化、同级组件装配与 Git 版本管理 |
 | FWC | Godot＋C# 框架代码及权威规范 |
 | FWE | 可选编辑器 |
 | FWA | 开发任务编排 |
 | FWS | 可独立使用的技能及必要辅助脚本 |
 
-FWC 仓库改名不代表宿主 `fw/` 路径、`fw.toml`、`fw` CLI、`Fw.*` 类型或数据协议改名。
+FW 是项目管理入口，FWC 是框架代码。已有宿主的 `fw/` 路径、`fw.toml`、`Fw.*` 类型和生成协议继续兼容；新装 FWC 默认采用同级 `fwc/`。
 
 独立仓库：[FWC](https://github.com/fiofiogamestudio/fwc)、[FWE](https://github.com/fiofiogamestudio/fwe)、[FWA](https://github.com/fiofiogamestudio/fwa)、[FWS](https://github.com/fiofiogamestudio/fws)。仅选用需要的组件。
 
@@ -28,7 +29,7 @@ FWC 仓库改名不代表宿主 `fw/` 路径、`fw.toml`、`fw` CLI、`Fw.*` 类
 
 ## 本地安装
 
-需要 Node.js 20.10.0 以上，无第三方 npm 依赖。FW 同步脚本另需 Git 与 PowerShell；FWS 其他技能不因而依赖它们。
+需要 Node.js 20.10.0 以上，无第三方 npm 依赖。`fw-sync` 的薄入口另需已安装的顶层 FW、Git 与 PowerShell；指定 `-FwRoot` 或 `FW_HOME`，或把 FWS 放在已验证 FW 的同级组件位置。Git 引擎和隔离回归唯一维护于 FW 的 `tools/`，不在 FWS 复制。FWS 其他技能不因而依赖它们。
 
 先 clone 本库到固定位置，再指定**当前客户端实际使用**的技能目录。此工作站沿用 `C:\Users\kaiji\.codex\skills`；其他环境可选择其已配置的用户或项目发现目录，避免在两处重复安装。
 
@@ -57,7 +58,7 @@ npm.cmd run verify
 npm.cmd run test:sync
 ```
 
-`check` 验证 catalog、入口元数据、UI 名称与引用；Node 测试验证安装预演、冲突、备份、幂等与失败恢复；同步测试使用 OS 临时目录中的模拟 Git 远端，不接触生产仓库。
+`check` 验证 catalog、入口元数据、UI 名称与引用；Node 测试验证安装预演、冲突、备份、幂等与失败恢复；`test:sync` 需要可定位的 FW，转发至其隔离 Git 回归，使用 OS 临时目录中的模拟远端，不接触生产仓库。
 
 结构检查和脚本回归不证明自然语言决策正确。[行为用例](evals/README.md) 单独覆盖触发、授权、任务比例和停止判断，语义验收不能用关键词正则冒充。
 

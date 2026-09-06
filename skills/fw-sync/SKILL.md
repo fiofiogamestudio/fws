@@ -1,6 +1,6 @@
 ---
 name: fw-sync
-description: 接入、更新或发布 FWC/FWE/FWA/FWS 的 Git 版本，核对独立仓库与宿主 gitlink。用于明确的框架同步请求，不因仅提到框架名而触发。
+description: 通过顶层 FW 接入、恢复、更新或发布所选组件的 Git 版本，核对独立仓库与宿主 gitlink。用于明确的框架同步请求，不因仅提到框架名而触发。
 ---
 
 # 框架版本同步
@@ -16,14 +16,14 @@ description: 接入、更新或发布 FWC/FWE/FWA/FWS 的 Git 版本，核对独
 
 ## 使用脚本
 
-脚本位于本技能目录的 [scripts/fw-sync.ps1](scripts/fw-sync.ps1)，从实际技能位置调用，不假定它安装在固定个人目录。
+本技能的 [scripts/fw-sync.ps1](scripts/fw-sync.ps1) 只是薄入口；Git 执行器唯一源在顶层 FW 的 `tools/sync.ps1`。入口按显式 `-FwRoot`、`FW_HOME`、FWS 真实源位置的同级父工程顺序定位（先解析安装技能的 junction/symlink），并验证 `package.json` 中 `name=fw`、`fwWorkspace=true`。定位失败即停，给出 bootstrap 提示，不自动 clone 或联网。不要把宿主历史 FWC 安装目录 `fw/` 当成顶层 FW。
 
 ```powershell
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File <技能目录>/scripts/fw-sync.ps1 status -ProjectRoot <目录> -Component fwa -Fetch -Json
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File <技能目录>/scripts/fw-sync.ps1 status -FwRoot <FW工作台> -ProjectRoot <目录> -Component fwa -Json
 ```
 
-支持 `status / new / pull / push / verify`；变更动作默认只预演，检查计划后传 `-Apply`。
-`-Component` 选择 `fwc / fwe / fwa / fws`；旧 `fw` 为 FWC 别名，`all` 只针对实际发现或明确配置的组件。
+支持 `status / new / sync / pull / push / verify`；变更动作默认只预演，检查计划后传 `-Apply`。
+`sync` 恢复宿主已提交 HEAD 的固定 gitlink，不更新浮动分支；`pull` 才是显式升级。`-Component` 选择 `fwc / fwe / fwa / fws`；`fw` 现在是顶层工作台，不能作为 FWC 别名。`-Components 'fwc,fwe'` 明确选择多个组件；`all` 只针对实际发现或明确配置的组件。
 新空工程必须明确选择，不补齐整套依赖。独立仓库和宿主的具体参数与验收差异见 [同步细则](references/governance.md)，首次操作或拓扑不明时读取。
 
 ## 完成闭环
