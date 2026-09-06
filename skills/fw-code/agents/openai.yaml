@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Code"
+  short_description: "定位 FWC 框架与宿主规范，按真实分层修改并进行相称验证"
+  default_prompt: "使用 $fw-code 按当前 FWC 或宿主工程的规范完成改动，并验证实际受影响的路径。"

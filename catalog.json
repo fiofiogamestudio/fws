@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    { "name": "fw-sync", "legacyNames": [] },
+    { "name": "fw-commit", "legacyNames": ["git-atomic-commits"] },
+    { "name": "fw-refine", "legacyNames": ["refine-existing-work"] },
+    { "name": "fw-debug", "legacyNames": ["verify-bug-before-fixing"] },
+    { "name": "fw-code", "legacyNames": ["fw"] }
+  ]
+}

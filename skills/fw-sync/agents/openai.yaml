@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Sync"
+  short_description: "按组件接入、更新、发布框架并核对远端版本与宿主引用状态"
+  default_prompt: "使用 $fw-sync 处理我指定的框架同步，先检查版本和本地改动，不自动接入其他组件。"

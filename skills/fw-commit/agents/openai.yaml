@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Commit"
+  short_description: "按真实修改意图整理暂存区，保护无关改动并创建清晰的小提交"
+  default_prompt: "使用 $fw-commit 将当前预期修改按真实意图分批提交，并保留无关改动。"

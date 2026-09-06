@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Refine"
+  short_description: "按证据评估已有成果，选择高收益改进并回归复评与适时停止"
+  default_prompt: "使用 $fw-refine 评估或优化这个已有成果，保留其目标与边界，并如实报告验证结果。"

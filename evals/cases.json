@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {"id":"sync-status","request":"看看当前工程 FWC 和 FWE 的本地版本与远端差多少，不要更新。","expected":{"skill":"fw-sync","action":"read"}},
+    {"id":"sync-one","request":"把 FWA 接进这个空工程，我不需要编辑器和游戏框架。","expected":{"skill":"fw-sync","action":"sync"}},
+    {"id":"sync-publish","request":"将已经验证的 FWS 修改提交并推送远端。","expected":{"skill":"fw-sync","action":"publish"}},
+    {"id":"sync-rename","request":"把 fw-sync 这个技能重命名为 fw-update。","expected":{"skill":null,"action":"implement"}},
+    {"id":"sync-concept","request":"FWC、FWE、FWA 是什么关系？解释一下，不改工程。","expected":{"skill":null,"action":"read"}},
+    {"id":"commit-only","request":"把这些修复按用途分批提交，不要推送。","expected":{"skill":"fw-commit","action":"commit"}},
+    {"id":"commit-plan","request":"只看看这些暂存与未暂存修改应该怎么分组，先别提交。","expected":{"skill":"fw-commit","action":"read"}},
+    {"id":"commit-test","request":"将缓存修复及其回归测试作为一个提交，notes.txt 留着不要提交。","expected":{"skill":"fw-commit","action":"commit"}},
+    {"id":"commit-explain","request":"解释一下 git rebase 和 merge 的区别。","expected":{"skill":null,"action":"read"}},
+    {"id":"refine-score","request":"给现有地图编辑器评分，讲最重要的问题，先不改。","expected":{"skill":"fw-refine","action":"read"}},
+    {"id":"refine-polish","request":"这个基本可用的设置界面再打磨一轮，保留现有架构。","expected":{"skill":"fw-refine","action":"implement"}},
+    {"id":"refine-stop","request":"上轮已无高收益改进，目标和证据都没变化；复核一下是否可以结束。","expected":{"skill":"fw-refine","action":"read"}},
+    {"id":"refine-new","request":"从零做一个天气小程序。","expected":{"skill":null,"action":"implement"}},
+    {"id":"refine-narrow","request":"把这个按钮的文字从保存改为提交。","expected":{"skill":null,"action":"implement"}},
+    {"id":"debug-fwe","request":"FWE 保存后旧数据偶尔覆盖新输入，先查原因，不要修改。","expected":{"skill":"fw-debug","action":"read"}},
+    {"id":"debug-fix","request":"修复这个断线后重复发奖励的 Bug，保留用户现有改动。","expected":{"skill":"fw-debug","action":"implement"}},
+    {"id":"debug-hypothesis","request":"我怀疑 Tooltip 是缩放错了，你先查实。","expected":{"skill":"fw-debug","action":"read"}},
+    {"id":"debug-visual","request":"这个图标太普通，给它设计一个新风格。","expected":{"skill":null,"action":"implement"}},
+    {"id":"code-config","request":"在使用 FWC 的游戏里新增一个配置字段，并生成对应 C# 和 Godot 读取代码。","expected":{"skill":"fw-code","action":"implement"}},
+    {"id":"code-runtime","request":"按 FWC 规范给 core system 增加计时统计并验证。","expected":{"skill":"fw-code","action":"implement"}},
+    {"id":"code-schema","request":"修改 FWC 宿主的 bridge schema，保持双端合同一致。","expected":{"skill":"fw-code","action":"implement"}},
+    {"id":"code-git","request":"只检查 FWC main 是否已经推送，不改代码。","expected":{"skill":"fw-sync","action":"read"}},
+    {"id":"code-unrelated","request":"给普通 React 网站增加暗色模式，它不使用 FWC。","expected":{"skill":null,"action":"implement"}},
+    {"id":"outside-writing","request":"把这段中文介绍润色得简短一点。","expected":{"skill":null,"action":"implement"}}
+  ]
+}

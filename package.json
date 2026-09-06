@@ -1,0 +1,15 @@
+{
+  "name": "fws",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Independent, evidence-led development skills for the FW family.",
+  "type": "module",
+  "engines": { "node": ">=20.10.0" },
+  "scripts": {
+    "check": "node tools/check.mjs",
+    "test": "node --test",
+    "verify": "npm run check && npm test",
+    "test:sync": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File skills/fw-sync/scripts/test-fw-sync.ps1 -KeepFixture"
+  }
+}

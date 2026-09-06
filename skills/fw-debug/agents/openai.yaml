@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Debug"
+  short_description: "用可复查证据定位真实根因，并按明确授权进行最小修复与验证"
+  default_prompt: "使用 $fw-debug 查实这个问题，区分事实与推断；没有明确修复要求时只调查。"
