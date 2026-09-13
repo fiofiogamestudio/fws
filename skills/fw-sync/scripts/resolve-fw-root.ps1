@@ -40,11 +40,19 @@ function Resolve-FwsWorkspaceRoot {
         else { Join-Path (Resolve-FwsPhysicalDirectory -Directory $PSScriptRoot) '../../../..' }
     if ([string]::IsNullOrWhiteSpace($candidate)) { throw 'FW location is empty.' }
     $resolved = Resolve-FwsPhysicalDirectory -Directory $candidate
-    $package = Get-Content -Raw -LiteralPath (Join-Path $resolved 'package.json') | ConvertFrom-Json
-    if (-not $package.PSObject.Properties['name'] -or -not $package.PSObject.Properties['fwWorkspace'] -or
-        $package.name -ne 'fw' -or $package.fwWorkspace -ne $true -or
-        -not (Test-Path -LiteralPath (Join-Path $resolved 'tools/sync.ps1') -PathType Leaf)) {
-        throw 'Expected the FW workspace package (name=fw, fwWorkspace=true) with tools/sync.ps1.'
+    # Accept either the FW program itself (including legacy flat checkouts),
+    # or the workbench containing sibling fw/, fwc/, fwe/, fwa/ and fws/.
+    # An explicit invalid root never falls back to FW_HOME or another checkout.
+    foreach ($programCandidate in @($resolved, (Join-Path $resolved 'fw'))) {
+        $packagePath = Join-Path $programCandidate 'package.json'
+        if (-not (Test-Path -LiteralPath $packagePath -PathType Leaf)) { continue }
+        try { $package = Get-Content -Raw -LiteralPath $packagePath | ConvertFrom-Json }
+        catch { continue }
+        if ($package.PSObject.Properties['name'] -and $package.PSObject.Properties['fwWorkspace'] -and
+            $package.name -eq 'fw' -and $package.fwWorkspace -is [bool] -and $package.fwWorkspace -eq $true -and
+            (Test-Path -LiteralPath (Join-Path $programCandidate 'tools/sync.ps1') -PathType Leaf)) {
+            return Resolve-FwsPhysicalDirectory -Directory $programCandidate
+        }
     }
-    return $resolved
+    throw 'Expected the FW program package (name=fw, fwWorkspace=true) with tools/sync.ps1, either at the supplied directory or its fw/ child.'
 }

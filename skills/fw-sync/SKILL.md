@@ -16,7 +16,7 @@ description: 通过顶层 FW 接入、恢复、更新或发布所选组件的 Gi
 
 ## 使用脚本
 
-本技能的 [scripts/fw-sync.ps1](scripts/fw-sync.ps1) 只是薄入口；Git 执行器唯一源在顶层 FW 的 `tools/sync.ps1`。入口按显式 `-FwRoot`、`FW_HOME`、FWS 真实源位置的同级父工程顺序定位（先解析安装技能的 junction/symlink），并验证 `package.json` 中 `name=fw`、`fwWorkspace=true`。定位失败即停，给出 bootstrap 提示，不自动 clone 或联网。不要把宿主历史 FWC 安装目录 `fw/` 当成顶层 FW。
+本技能的 [scripts/fw-sync.ps1](scripts/fw-sync.ps1) 只是薄入口；Git 执行器唯一源在 FW 程序的 `tools/sync.ps1`（工作台布局为 `fw/tools/sync.ps1`）。入口优先使用显式 `-FwRoot`，其次 `FW_HOME`；两者均可指向外层工作台或内层 FW 程序。未配置时，先解析安装技能的 junction/symlink，再从 FWS 真实源位置查找同级 `fw/`；兼容程序位于工作台根目录的旧布局。候选必须通过 `package.json` 中 `name=fw`、布尔值 `fwWorkspace=true` 及 `tools/sync.ps1` 检查。显式路径无效即停，不回退到其他工作台，不自动 clone 或联网。不要把宿主历史 FWC 安装目录 `fw/` 当成 FW 程序。
 
 ```powershell
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File <技能目录>/scripts/fw-sync.ps1 status -FwRoot <FW工作台> -ProjectRoot <目录> -Component fwa -Json

@@ -29,7 +29,9 @@ FW 是项目管理入口，FWC 是框架代码。已有宿主的 `fw/` 路径、
 
 ## 本地安装
 
-需要 Node.js 20.10.0 以上，无第三方 npm 依赖。`fw-sync` 的薄入口另需已安装的顶层 FW、Git 与 PowerShell；指定 `-FwRoot` 或 `FW_HOME`，或把 FWS 放在已验证 FW 的同级组件位置。Git 引擎和隔离回归唯一维护于 FW 的 `tools/`，不在 FWS 复制。FWS 其他技能不因而依赖它们。
+Windows 双击 [start.bat](start.bat) 打开 `skills/`，并在控制台保留使用说明和安装预演命令。入口不会安装技能；`start.bat --check` 仅检查路径且不弹窗、不暂停，`start.bat --help` 显示参数。查看源码和说明无需 Node.js。
+
+安装器需要 Node.js 20.10.0 以上，无第三方 npm 依赖。`fw-sync` 的薄入口另需已安装的顶层 FW、Git 与 PowerShell；`-FwRoot` 或 `FW_HOME` 可指向外层工作台，也可指向其中的 `fw/` 程序目录。无显式配置时，从 FWS 真实源位置查找同级 `fw/`，并兼容旧式程序位于工作台根目录的布局。候选必须有 `name=fw`、`fwWorkspace=true` 的 `package.json` 和 `tools/sync.ps1`；仅目录叫 `fw` 不算通过。Git 引擎和隔离回归唯一维护于 FW 程序的 `tools/`，不在 FWS 复制。FWS 其他技能不因而依赖它们。
 
 先 clone 本库到固定位置，再指定**当前客户端实际使用**的技能目录。此工作站沿用 `C:\Users\kaiji\.codex\skills`；其他环境可选择其已配置的用户或项目发现目录，避免在两处重复安装。
 

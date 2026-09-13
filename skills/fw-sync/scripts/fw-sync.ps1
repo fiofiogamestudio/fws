@@ -33,7 +33,7 @@ try {
     $engine = Join-Path $resolved 'tools/sync.ps1'
 }
 catch {
-    Write-Error "FW Git engine was not found or verified. Install/check out the top-level FW workspace separately, then pass -FwRoot <FW checkout> or set FW_HOME. FWC's historical fw/ directory is not FW. No download was attempted. $($_.Exception.Message)"
+    Write-Error "FW Git engine was not found or verified. Install/check out FW separately, then pass -FwRoot <FW workbench or its fw program directory> or set FW_HOME. FWC's historical fw/ directory is not FW. No download was attempted. $($_.Exception.Message)" -ErrorAction Continue
     exit 2
 }
 $forward = @{} + $PSBoundParameters
