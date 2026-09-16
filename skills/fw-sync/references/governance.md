@@ -11,7 +11,7 @@
 | `fwa` | `https://github.com/fiofiogamestudio/fwa.git` | `-FwaPath / -FwaUrl / -FwaTarget` |
 | `fws` | `https://github.com/fiofiogamestudio/fws.git` | `-FwsPath / -FwsUrl / -FwsTarget` |
 
-旧 `-FwPath / -FwUrl / -FwTarget` 保留为 FWC 参数别名，但 `-Component fw` 不再接受。新安装默认目录为 `fwc`；已登记宿主的 `fw/` 路径仍按实际 `.gitmodules` 复用，不额外装第二份。`fw.git` 现在是顶层 FW，不能把它当成旧 FWC 来源；历史地址须先核实并显式改为 canonical FWC 地址。
+旧 `-FwPath / -FwUrl / -FwTarget` 保留为 FWC 参数别名，但 `-Component fw` 不再接受。新安装默认目录为 `fw/fwc`，其他所选组件对应 `fw/<id>`；`fw/` 是普通容器。已登记宿主的旧路径仍按实际 `.gitmodules` 复用，不额外装第二份，也不在升级时自动搬迁。`fw.git` 现在是顶层 FW，不能把它当成旧 FWC 来源；历史地址须先核实并显式改为 canonical FWC 地址。
 
 执行器属于 FW 程序，不属于 FWS。本技能脚本只定位、验证并转发；`-FwRoot` 或 `FW_HOME` 可指向已安装的外层工作台或其 `fw/` 程序目录。没有配置时从 FWS 真实源位置查找同级程序，并兼容旧式平铺布局。两种布局都核验程序包身份与 `tools/sync.ps1`，不把普通 FWC 目录误当成 FW；显式配置无效时不回退其他安装。缺少执行器时先停止并报告安装要求，不悄悄下载组件或复制执行器。
 
