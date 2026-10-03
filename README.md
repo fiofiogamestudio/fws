@@ -5,12 +5,12 @@
 | 仓库 | 职责 |
 |---|---|
 | FW | 顶层项目初始化、同级组件装配与 Git 版本管理 |
-| FWC | Godot＋C# 框架代码及权威规范 |
+| FWC | Godot C# / GDScript 框架代码及权威规范 |
 | FWE | 可选编辑器 |
 | FWA | 开发任务编排 |
 | FWS | 可独立使用的技能及必要辅助脚本 |
 
-FW 是项目管理入口，FWC 是框架代码。已有宿主的 `fw/` 路径、`fw.toml`、`Fw.*` 类型和生成协议继续兼容；新装 FWC 默认采用同级 `fwc/`。
+FW 是项目管理入口，FWC 是框架代码。已有宿主按 `.gitmodules` 保留安装路径，`fw.toml`、`Fw.*` 类型和生成协议继续兼容；新游戏将所选组件装入普通容器 `fw/`，FWC 默认位置为 `fw/fwc/`。组件开发工作台仍采用同级 `fwc/`、`fwe/` 等目录。
 
 独立仓库：[FWC](https://github.com/fiofiogamestudio/fwc)、[FWE](https://github.com/fiofiogamestudio/fwe)、[FWA](https://github.com/fiofiogamestudio/fwa)、[FWS](https://github.com/fiofiogamestudio/fws)。仅选用需要的组件。
 
