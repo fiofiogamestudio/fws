@@ -23,9 +23,12 @@ FW 是项目管理入口，FWC 是框架代码。已有宿主按 `.gitmodules` �
 | `fw-refine` | 评估与高收益打磨，回归复评并及时停止 | `refine-existing-work` |
 | `fw-debug` | 查实具体问题，获准后最小修复 | `verify-bug-before-fixing` |
 | `fw-code` | 按 FWC/宿主规范维护代码及生成合同 | 项目技能 `fw` |
+| `fw-ui-capture` | 遍历游戏 UI，采集真实截图并生成编号审阅图库 | 新增 |
 
 技能唯一源在 `skills/`。`fw-code` 读取所选工程的规范，不在 FWS 复制代码规范；FWC 不需要 FWS 才能生成、构建或运行。
 几个技能可以按实际任务组合，但不要求先加载一个公共“总控技能”。
+
+`fw-ui-capture` 适用于 Godot、Unity 和 Web 游戏，不要求接入 FWC。它包含覆盖清单与运行端采集指引，以及无依赖的离线图库生成器；游戏特有的存档夹具和入口仍由宿主提供。示例请求：`使用 $fw-ui-capture，把这个游戏的所有 UI 和关键状态截图，生成可按编号反馈问题的图库。`
 
 ## 本地安装
 
