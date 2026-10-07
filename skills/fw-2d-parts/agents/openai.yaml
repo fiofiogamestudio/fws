@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW 2D Parts"
+  short_description: "提取角色整图、透明拆分图层与原始部件，整理可追溯的美术交接包"
+  default_prompt: "使用 $fw-2d-parts 将这些角色的整图和拆件按文件夹整理，保留源素材与组装关系，并检查图层还原效果。"
