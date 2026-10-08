@@ -1,11 +1,11 @@
 ---
 name: fw-ui-capture
-description: 遍历游戏 UI 的页面、弹窗与关键状态，截取真实运行画面并生成带编号、筛选和问题备注的审阅图库。用于“把所有 UI 截一下”或更新截图集，适配 Godot、Unity、Web；不因普通 UI 修改而触发全量截图。
+description: 遍历游戏 UI 的页面、弹窗与关键状态，采集真实截图并调用 FWV 的固定 FWE 审阅界面。用于“把所有 UI 截一下”或更新截图集，适配 Godot、Unity、Web；不因普通 UI 修改而触发全量截图。
 ---
 
 # 游戏 UI 截图审阅
 
-把用户指定范围的真实界面整理成可逐张反馈的图库。先建立覆盖清单，再截图；图片数量不能代替覆盖率。默认只采集和整理，不顺便重做 UI。
+把用户指定范围的真实界面整理成可逐张反馈的图库。先建立覆盖清单，再截图；图片数量不能代替覆盖率。默认只采集和整理，不顺便重做 UI，也不为每个游戏重写审阅器。
 
 ## 确定覆盖范围
 
@@ -28,23 +28,32 @@ description: 遍历游戏 UI 的页面、弹窗与关键状态，截取真实运
 
 “captured”只表示已获得可检查的画面，不表示 UI 正确、交互测试通过、手机实机通过或全流程通过。核对后才把清单项标为 captured；不能到达时标 blocked，并给出具体原因。
 
-## 生成图库
+## 在固定审阅器中检查
 
 按 [清单格式](references/manifest.md) 写 `capture.json`。稳定语义 `id` 用于识别状态，正整数 `number` 用于用户引用；按页面流程分配编号。每张图保存真实宽高、证据和简短标题。
 
 默认将过程与夹具放入项目的临时目录，交付图库放入项目约定的产物目录。FW 工程通常为 `.local/ui-capture/<run>/` 与 `output/ui-capture-<run>/`；其他工程尊重已有约定。
 
-用技能目录中的 [图库生成器](scripts/build-gallery.mjs) 构建一个**尚不存在**的输出目录（Node.js 20.10+，无第三方依赖）：
+使用 [薄入口](scripts/ui-capture.mjs) 调用 FWV 的 `ui` 工具（Node.js 20.10+）。采集游戏不要求接入 FW；审阅界面使用已有 FWV + FWE，验证与离线导出只需要 FWV。入口按 `--fw-root`、`FW_HOME`、技能真实 FWS 源目录的同级工作区顺序定位，验证 FWV 包和 CLI；显式路径错误时不回退，也不自动安装组件。
 
 ```text
-node <skill-dir>/scripts/build-gallery.mjs --manifest <capture.json> --out <new-gallery-directory>
+node <skill-dir>/scripts/ui-capture.mjs validate --manifest <capture.json> --fw-root <FW-workspace>
+node <skill-dir>/scripts/ui-capture.mjs serve --manifest <capture.json> --fw-root <FW-workspace> --fwe-path <FWE-directory> --port 0
 ```
 
-它校验清单、PNG尺寸与覆盖引用，原样复制图片，生成可离线打开的 `index.html`、`capture.json` 和 `coverage.json`。支持分类、搜索、历史筛选、编号直达、原图、放大、上一张／下一张、问题备注和备注 JSON 导出。它不会启动游戏，也不能从 PNG 自动证明采集真实性。
+打开服务返回的本地审阅地址。固定界面由 FWV 提供内容/API，FWE 提供编辑器壳；技能不携带编辑器或图库模板。缺少审阅依赖时报告具体缺项，保留已采集 PNG 和清单；有 FWV 时仍可离线导出。
 
-- 打开实际生成的图库，检查首张、长文本／特殊尺寸及末张；验证筛选、编号定位、图片加载和备注功能。本机 HTML 即可，已有本地 HTTP 服务也可使用；不默认上传公开网站。
-- 备注只存当前浏览器／当前源，可导出 JSON 保存。不同文件路径、端口或浏览器不保证共享备注；不要把页面存储当作服务端归档。
+- 检查首张、长文本／特殊尺寸及末张，验证筛选、编号定位、图片加载和备注保存/导出。工具验证清单、PNG尺寸与覆盖引用，不启动游戏，也不能自动证明采集真实性。
+- 服务端备注保存在输入清单旁的 `review.json`，与该清单指纹绑定；修改清单前先导出备注并保留旧集合。离线 HTML 的浏览器本地备注不保证跨路径、端口或浏览器共享。
 - 更新截图集时保留原 `id`、编号和原图字节；旧图标为 `historical`，新图使用新 `id` 和递增编号。只将真正替换的状态转历史，保留旧图库，构建新目录；当前覆盖引用新的截图。备注可先导出，避免丢失。
+
+需要可离线交付的图库时，由同一 FWV 后端导出到**尚不存在**的目录：
+
+```text
+node <skill-dir>/scripts/ui-capture.mjs export --manifest <capture.json> --out <new-gallery-directory> --fw-root <FW-workspace>
+```
+
+导出保留原 PNG 字节，生成 `index.html`、`capture.json`、`coverage.json` 和审阅备注 `review.json`。旧 [build-gallery 命令](scripts/build-gallery.mjs) 仅兼容转发到此导出入口。交付前打开实际导出文件复核；不默认上传公开网站。
 
 ## 交付与停止
 

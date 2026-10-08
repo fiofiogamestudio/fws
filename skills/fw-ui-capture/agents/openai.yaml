@@ -1,4 +1,4 @@
 interface:
   display_name: "FW UI Capture"
-  short_description: "遍历游戏界面与关键状态，生成真实截图、固定编号和可备注的审阅图库"
-  default_prompt: "使用 $fw-ui-capture 把这个游戏的所有 UI 和关键状态截图，生成可按编号反馈问题的图库，并列出未覆盖项。"
+  short_description: "遍历游戏界面与关键状态，采集真实截图并调用 FWV 的固定审阅界面"
+  default_prompt: "使用 $fw-ui-capture 把这个游戏的所有 UI 和关键状态截图，在 FWV 的固定 FWE 审阅界面按编号检查，并列出未覆盖项。"

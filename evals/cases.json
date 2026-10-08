@@ -28,6 +28,8 @@
     {"id":"ui-capture-all-godot","request":"把这个 Godot 游戏的所有 UI 界面都截一遍，弹窗和空状态也要，做成可编号批注的图库；先不要改游戏。","expected":{"skill":"fw-ui-capture","action":"capture"}},
     {"id":"ui-capture-update-unity","request":"Unity 游戏这轮改了商店和结算页，更新之前的 UI 审阅图库，旧图编号和我的批注要保留。","expected":{"skill":"fw-ui-capture","action":"capture"}},
     {"id":"ui-capture-single-web","request":"用 $fw-ui-capture 只截当前浏览器里的游戏设置弹窗，保留当前分辨率，不用遍历其他页面。","expected":{"skill":"fw-ui-capture","action":"capture"}},
+    {"id":"ui-capture-fixed-review","request":"用 $fw-ui-capture 把这份 capture.json 接到 FWV 现有的 FWE 审阅界面，不要再写一个项目专用编辑器。","expected":{"skill":"fw-ui-capture","action":"capture"}},
+    {"id":"ui-capture-offline-no-fwe","request":"用 $fw-ui-capture 导出已有截图清单的离线图库，机器有 FWV 但没有 FWE，不要安装新组件。","expected":{"skill":"fw-ui-capture","action":"capture"}},
     {"id":"ui-capture-not-redesign","request":"把游戏设置面板改成木质风格，按钮加大，保持现有功能。","expected":{"skill":null,"action":"implement"}},
     {"id":"ui-capture-not-mockup","request":"游戏还没有运行界面，先生成一张战斗 UI 的设计参考图。","expected":{"skill":null,"action":"implement"}},
     {"id":"parts-handoff","request":"把现有喵喵和老鼠的整图、拆分图片与源部件按角色整理，我要发给美术调优。","expected":{"skill":"fw-2d-parts","action":"export"}},
