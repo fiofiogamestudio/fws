@@ -30,6 +30,8 @@
     {"id":"ui-capture-single-web","request":"用 $fw-ui-capture 只截当前浏览器里的游戏设置弹窗，保留当前分辨率，不用遍历其他页面。","expected":{"skill":"fw-ui-capture","action":"capture"}},
     {"id":"ui-capture-fixed-review","request":"用 $fw-ui-capture 把这份 capture.json 接到 FWV 现有的 FWE 审阅界面，不要再写一个项目专用编辑器。","expected":{"skill":"fw-ui-capture","action":"capture"}},
     {"id":"ui-capture-offline-no-fwe","request":"用 $fw-ui-capture 导出已有截图清单的离线图库，机器有 FWV 但没有 FWE，不要安装新组件。","expected":{"skill":"fw-ui-capture","action":"capture"}},
+    {"id":"ui-capture-auto-check","request":"用 $fw-ui-capture 截完后逐张看真实画面，给绿黄红自动检查和具体理由；不要把截图成功直接当成界面没问题。","expected":{"skill":"fw-ui-capture","action":"capture"}},
+    {"id":"ui-capture-current-problems","request":"在 $fw-ui-capture 里复核这批图片，保留原备注，分别记录 AI 判断与人工通过、跳过、不通过；复制所有当前有问题的图，不要被我现在的模块筛选漏掉。","expected":{"skill":"fw-ui-capture","action":"capture"}},
     {"id":"ui-capture-not-redesign","request":"把游戏设置面板改成木质风格，按钮加大，保持现有功能。","expected":{"skill":null,"action":"implement"}},
     {"id":"ui-capture-not-mockup","request":"游戏还没有运行界面，先生成一张战斗 UI 的设计参考图。","expected":{"skill":null,"action":"implement"}},
     {"id":"parts-handoff","request":"把现有喵喵和老鼠的整图、拆分图片与源部件按角色整理，我要发给美术调优。","expected":{"skill":"fw-2d-parts","action":"export"}},
