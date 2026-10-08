@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Plan Choice"
+  short_description: "规划可比较的方案并制作可查看演示，保留基线，承接用户选择后的实装与验证"
+  default_prompt: "使用 $fw-plan-choice 调查当前实现，做几个有明显差异且能查看的演示方案让我选，选定后再接入并验证。"

@@ -5,6 +5,7 @@
     { "name": "fw-commit", "legacyNames": ["git-atomic-commits"] },
     { "name": "fw-refine", "legacyNames": ["refine-existing-work"] },
     { "name": "fw-debug", "legacyNames": ["verify-bug-before-fixing"] },
+    { "name": "fw-plan-choice", "legacyNames": [] },
     { "name": "fw-code", "legacyNames": ["fw"] },
     { "name": "fw-ui-capture", "legacyNames": [] },
     { "name": "fw-2d-parts", "legacyNames": [] }
