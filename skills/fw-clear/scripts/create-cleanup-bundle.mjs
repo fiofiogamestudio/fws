@@ -26,13 +26,13 @@ function within(child, root) {
   return relative === '' || (relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative));
 }
 
-function bat(preview) {
+function bat() {
   // No manifest data is inserted into cmd syntax. Expansion of %~dp0 happens once;
   // delayed expansion is disabled so ! and other characters in the bundle path survive.
   return [
     '@echo off',
     'setlocal DisableDelayedExpansion',
-    `powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0execute-cleanup.ps1" -PlanPath "%~dp0cleanup-plan.json" ${preview ? '' : '-Apply'}`.trimEnd(),
+    'powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0execute-cleanup.ps1" -PlanPath "%~dp0cleanup-plan.json" -Apply',
     'set "CLEANUP_EXIT=%ERRORLEVEL%"',
     'echo.',
     'echo Finished. Exit code: %CLEANUP_EXIT%. See cleanup-results.json and cleanup-results.log.',
@@ -87,10 +87,8 @@ export async function createCleanupBundle({ manifest, out, onProgress } = {}) {
     await fs.mkdir(output); // Atomic refusal if another process created this path.
     await fs.copyFile(executor, path.join(output, 'execute-cleanup.ps1'), fs.constants.COPYFILE_EXCL);
     await fs.copyFile(planPath, path.join(output, 'cleanup-plan.json'), fs.constants.COPYFILE_EXCL);
-    await fs.writeFile(path.join(output, 'cleanup.bat'), bat(false), { encoding: 'ascii', flag: 'wx' });
-    await fs.writeFile(path.join(output, 'preview.bat'), bat(true), { encoding: 'ascii', flag: 'wx' });
+    await fs.writeFile(path.join(output, 'cleanup.bat'), bat(), { encoding: 'ascii', flag: 'wx' });
     await fs.writeFile(path.join(output, 'README.txt'), [
-      'Double-click preview.bat to validate the sealed plan without deleting files.',
       'Double-click cleanup.bat to delete only unchanged, safe targets in cleanup-plan.json.',
       'There is no extra confirmation. Active process guards skip their own targets.',
       'Exit codes: 0 = all ready/successful; 2 = skipped/failed items; 1 = invalid plan/fatal error.',

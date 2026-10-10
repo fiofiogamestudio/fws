@@ -54,18 +54,21 @@ test('cleanup CLI refuses missing, repeated, unknown and relative arguments', ()
   assert.deepEqual(parseArguments(['--manifest', 'a', '--out', 'b']), { manifest: 'a', out: 'b' });
 });
 
-test('generated BAT safely deletes Unicode/metacharacter paths; preview and repeat runs are explicit', { skip: !windows }, async t => {
+test('generated cleanup BAT safely deletes Unicode/metacharacter paths without a preview BAT; repeat runs are explicit', { skip: !windows }, async t => {
   const f = await fixture(t);
   const bundle = await generate(f);
+  assert.deepEqual((await fs.readdir(bundle.out)).sort(), ['README.txt', 'cleanup-plan.json', 'cleanup.bat', 'execute-cleanup.ps1'].sort());
+  assert.ok(!(await fs.readFile(path.join(bundle.out, 'README.txt'), 'ascii')).includes('preview.bat'));
   const plan = JSON.parse(await fs.readFile(path.join(bundle.out, 'cleanup-plan.json'), 'utf8'));
   assert.equal(plan.targets[0].snapshot.logicalBytes, 12);
   assert.equal(plan.targets[0].snapshot.files, 1);
   assert.equal(plan.targets[0].snapshot.algorithm, 'sha256-sorted-path-type-length-mtimeUtcTicks-v1');
   assert.ok(!JSON.stringify(plan).includes('文件 &'), 'Plan stores an aggregate snapshot, not all file paths.');
-  const preview = await execute(bundle);
-  assert.equal(preview.exitCode, 0, preview.output);
-  assert.equal(preview.report.targets[0].status, 'ready');
-  assert.equal(preview.report.removedLogicalBytes, 0);
+  // Exercise the executor's internal read-only mode without a user-facing BAT.
+  const validation = await execute(bundle);
+  assert.equal(validation.exitCode, 0, validation.output);
+  assert.equal(validation.report.targets[0].status, 'ready');
+  assert.equal(validation.report.removedLogicalBytes, 0);
   assert.equal(await fs.readFile(path.join(f.root, 'keep-source.cs'), 'utf8'), 'must remain');
   assert.ok(await fs.stat(f.target));
   // Run cmd against the real generated BAT with a newline for its final pause.
