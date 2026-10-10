@@ -8,6 +8,7 @@
     { "name": "fw-plan-choice", "legacyNames": [] },
     { "name": "fw-code", "legacyNames": ["fw"] },
     { "name": "fw-ui-capture", "legacyNames": [] },
-    { "name": "fw-2d-parts", "legacyNames": [] }
+    { "name": "fw-2d-parts", "legacyNames": [] },
+    { "name": "fw-clear", "legacyNames": [] }
   ]
 }

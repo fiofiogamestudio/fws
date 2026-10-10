@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Clear"
+  short_description: "盘点工程磁盘占用，列出有依据的清理候选，按明确授权清理并复核释放空间"
+  default_prompt: "使用 $fw-clear 检查当前工程的大目录和大文件，列出可删除候选、大小、依据与再生成条件，先不要删除。"
