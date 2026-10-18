@@ -1,0 +1,4 @@
+interface:
+  display_name: "FW Package Size"
+  short_description: "核对游戏平台包体规范，实测大项占用并压缩，保留功能与画面声音质量"
+  default_prompt: "使用 $fw-package-size 检查当前游戏目标平台的真实包体和现行限制，找出大项并完成可回滚的压缩、重建与运行验证。"

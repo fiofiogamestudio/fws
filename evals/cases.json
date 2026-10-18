@@ -55,6 +55,13 @@
     {"id":"clear-existing-authorization","request":"继续上轮已授权的两个精确缓存目录清理，其他工程和归档盘目录不在范围内，不用再问同一许可。","expected":{"skill":"fw-clear","action":"clear"}},
     {"id":"clear-mixed-evidence","request":"检查项目里被 Git 忽略的大文件，包含 ArtSource、最近的录像、Library 和旧压缩包，列出候选即可。","expected":{"skill":"fw-clear","action":"read"}},
     {"id":"clear-not-source-removal","request":"重构业务代码，删除没有再调用的旧 API 并修复调用方。","expected":{"skill":null,"action":"implement"}},
-    {"id":"clear-not-git-reset","request":"撤销刚才的源文件修改，让它们恢复到 HEAD，先告诉我会影响哪些文件。","expected":{"skill":null,"action":"read"}}
+    {"id":"clear-not-git-reset","request":"撤销刚才的源文件修改，让它们恢复到 HEAD，先告诉我会影响哪些文件。","expected":{"skill":null,"action":"read"}},
+    {"id":"package-size-read","request":"检查当前 TapTap H5 上传包有多大，是否符合当前这条发布路线的体积要求，先不要改。","expected":{"skill":"fw-package-size","action":"read"}},
+    {"id":"package-size-optimize","request":"这个游戏的 Web 包太大，请尽可能压缩，保留功能和画面声音质量，重新打包并验证。","expected":{"skill":"fw-package-size","action":"implement"}},
+    {"id":"package-size-unity","request":"Unity Web 发布包 70 MB，分析哪些资源最大，按实际收益优化，再检查字体、音乐和后续关卡是否正常。","expected":{"skill":"fw-package-size","action":"implement"}},
+    {"id":"package-size-transfer","request":"ZIP 已变小但首次打开仍然很慢，请实测冷缓存启动流量，核对 Brotli 文件与服务器响应头并修好。","expected":{"skill":"fw-package-size","action":"implement"}},
+    {"id":"package-size-no-publish","request":"继续上轮已授权的包体优化，把验证通过的候选纳入打包配置并交付 ZIP，不要上传或提交。","expected":{"skill":"fw-package-size","action":"implement"}},
+    {"id":"package-size-not-disk-clean","request":"清理工程的可再生成缓存来释放磁盘空间，不改变最终发布包的内容。","expected":{"skill":"fw-clear","action":"clear"}},
+    {"id":"package-size-not-skill-authoring","request":"把游戏包体审计流程写成通用 skill，注册进 FWS；这次不检查或修改任何游戏包。","expected":{"skill":null,"action":"implement"}}
   ]
 }
