@@ -45,12 +45,25 @@ function Within-Path([string] $Child, [string] $Root) {
     return (Same-Path $Child $Root) -or $Child.StartsWith(($Root.TrimEnd('\') + '\'), [StringComparison]::OrdinalIgnoreCase)
 }
 
+function Is-GitStorage([string] $Directory) {
+    # Bare repositories, --separate-git-dir and linked-worktree admin directories
+    # need not be named .git. Protect both the storage and any descendant target.
+    if (-not (Test-Path -LiteralPath $Directory -PathType Container)) { return $false }
+    return (Test-Path -LiteralPath (Join-Path $Directory 'HEAD') -PathType Leaf) -and (
+        (Test-Path -LiteralPath (Join-Path $Directory 'objects') -PathType Container) -or (
+            (Test-Path -LiteralPath (Join-Path $Directory 'commondir') -PathType Leaf) -and
+            (Test-Path -LiteralPath (Join-Path $Directory 'gitdir') -PathType Leaf)
+        )
+    )
+}
+
 function Check-Ancestors([string] $Target) {
     $current = $Target
     while ($current) {
         $item = Get-Item -LiteralPath $current -Force
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Reparse point in target or ancestor.' }
         if ($item.Name -eq '.git') { throw 'Git metadata cannot be a cleanup target.' }
+        if ($item.PSIsContainer -and (Is-GitStorage $current)) { throw 'Git repository storage in target or ancestor is protected.' }
         $parent = [IO.Directory]::GetParent($current)
         if ($null -eq $parent) { break }
         $current = $parent.FullName
@@ -98,6 +111,29 @@ function Get-GitRoot([string] $Root) {
 function Check-Tracked([string] $Target, [string] $GitRoot) {
     if (-not $GitRoot) { return }
     $relative = $Target.Substring($GitRoot.Length + 1).Replace('\', '/')
+    # One fresh query includes both the index and HEAD. Do not cache ownership:
+    # another task may stage a previously untracked file between targets.
+    $savedPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { $output = @(& git -C $GitRoot ls-files --with-tree=HEAD -z -- (':(literal,icase)' + $relative) 2>$null); $queryExit = $LASTEXITCODE }
+    finally { $ErrorActionPreference = $savedPreference }
+    if ($queryExit -eq 0) {
+        if ($output.Count -gt 0) { throw 'Git tracked files are protected, including modified tracked files; HEAD tracked files are protected, including staged deletions.' }
+        return
+    }
+    # Only an unborn repository may fall back to the index alone. Corrupt HEAD,
+    # unreadable index and all other failures remain blocking errors.
+    $head = @(& git -C $GitRoot rev-parse --verify --quiet HEAD)
+    if ($LASTEXITCODE -ne 1) { throw 'Git HEAD tracked-file check failed.' }
+    $branch = @(& git -C $GitRoot symbolic-ref --quiet HEAD)
+    if ($LASTEXITCODE -ne 0 -or $branch.Count -ne 1 -or -not $branch[0].StartsWith('refs/heads/', [StringComparison]::Ordinal)) { throw 'Git HEAD is unreadable or is not a valid unborn branch.' }
+    $null = & git -C $GitRoot check-ref-format $branch[0]
+    if ($LASTEXITCODE -ne 0) { throw 'Git HEAD branch reference is invalid.' }
+    $savedPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { $null = & git -C $GitRoot show-ref --verify --quiet $branch[0] 2>$null; $branchExit = $LASTEXITCODE }
+    finally { $ErrorActionPreference = $savedPreference }
+    if ($branchExit -ne 1) { throw 'Git HEAD is not a verified unborn branch.' }
     $output = @(& git -C $GitRoot ls-files -z -- (':(literal,icase)' + $relative))
     if ($LASTEXITCODE -ne 0) { throw 'Git tracked-file check failed.' }
     if ($output.Count -gt 0) { throw 'Git tracked files are protected, including modified tracked files.' }
@@ -133,6 +169,12 @@ public sealed class FWSClearSnapshot {
             long length = 0;
             var directory = (item.Attributes & FileAttributes.Directory) != 0;
             if (directory) {
+                // Repository storage may be nested under an ordinary cache or
+                // backup name, without a .git directory anywhere in this target.
+                if (File.Exists(Path.Combine(item.FullName, "HEAD")) &&
+                    (Directory.Exists(Path.Combine(item.FullName, "objects")) ||
+                     (File.Exists(Path.Combine(item.FullName, "commondir")) && File.Exists(Path.Combine(item.FullName, "gitdir")))))
+                    throw new IOException("Git repository storage in target subtree is protected.");
                 result.directories++;
                 foreach (var child in ((DirectoryInfo)item).EnumerateFileSystemInfos()) pending.Push(child);
             } else {
@@ -159,7 +201,7 @@ public sealed class FWSClearSnapshot {
 
 function Get-Snapshot([string] $Target) { return [FWSClearSnapshot]::Capture($Target) }
 
-function Validate-Guards($Guards, $Roots) {
+function Validate-Guards($Guards) {
     if ($null -eq $Guards) { return }
     foreach ($guard in @($Guards)) {
         if (-not (Has-Property $guard 'processName') -or [string]::IsNullOrWhiteSpace($guard.processName) -or $guard.processName -notmatch '^[a-zA-Z0-9_. -]+$') { throw 'Guard requires a literal processName.' }
@@ -167,8 +209,9 @@ function Validate-Guards($Guards, $Roots) {
         $hasExecutable = Has-Property $guard 'executableRoot'
         if ($hasProject -eq $hasExecutable) { throw 'Each guard requires exactly one projectRoot or executableRoot.' }
         $field = if ($hasProject) { 'projectRoot' } else { 'executableRoot' }
+        # Process ownership filters are read-only and may name an external
+        # worker. They never add to the authorized deletion roots.
         $guard.$field = Normalize-Path $guard.$field
-        if (@($Roots | Where-Object { Within-Path $guard.$field $_ }).Count -eq 0) { throw 'Guard path is outside authorized roots.' }
     }
 }
 
@@ -176,17 +219,25 @@ function Validate-Shape($Plan, [switch] $Sealed) {
     if ($Plan.schemaVersion -ne 1 -or -not (Has-Property $Plan 'roots') -or -not (Has-Property $Plan 'targets') -or @($Plan.roots).Count -eq 0 -or @($Plan.targets).Count -eq 0) { throw 'Invalid or empty manifest.' }
     $roots = @($Plan.roots | ForEach-Object { Normalize-Path $_ })
     foreach ($root in $roots) { Check-Root $root }
-    $targets = New-Object 'System.Collections.Generic.List[string]'
+    $targets = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $targetAncestors = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($target in @($Plan.targets)) {
         if (-not (Has-Property $target 'reason') -or [string]::IsNullOrWhiteSpace($target.reason)) { throw 'Each target requires a review reason.' }
         $target.path = Normalize-Path $target.path
         $root = Resolve-Root $target.path $roots
         if ($target.path.Split('\') -contains '.git') { throw 'Git metadata cannot be a cleanup target.' }
-        foreach ($earlier in $targets) {
-            if ((Within-Path $target.path $earlier) -or (Within-Path $earlier $target.path)) { throw 'Duplicate or overlapping cleanup targets.' }
+        # Hash sets avoid quadratic pairwise comparisons for thousands of exact
+        # media files. Ancestors detect overlap in either input order; siblings
+        # such as "run" and "run.old" remain distinct.
+        if ($targets.Contains($target.path) -or $targetAncestors.Contains($target.path)) { throw 'Duplicate or overlapping cleanup targets.' }
+        $ancestor = [IO.Path]::GetDirectoryName($target.path)
+        while ($ancestor) {
+            if ($targets.Contains($ancestor)) { throw 'Duplicate or overlapping cleanup targets.' }
+            $null = $targetAncestors.Add($ancestor)
+            $ancestor = [IO.Path]::GetDirectoryName($ancestor)
         }
-        $targets.Add($target.path)
-        if (Has-Property $target 'processGuards') { Validate-Guards $target.processGuards $roots }
+        $null = $targets.Add($target.path)
+        if (Has-Property $target 'processGuards') { Validate-Guards $target.processGuards }
         if ($Sealed) {
             if (-not (Has-Property $target 'authorizedRoot') -or -not (Same-Path $root $target.authorizedRoot) -or -not (Has-Property $target 'gitRoot') -or -not (Has-Property $target 'snapshot') -or $target.snapshot.digest -notmatch '^[a-f0-9]{64}$' -or $target.snapshot.algorithm -ne 'sha256-sorted-path-type-length-mtimeUtcTicks-v1') { throw 'Invalid sealed target.' }
             foreach ($field in @('files', 'directories', 'logicalBytes')) {
@@ -200,12 +251,35 @@ function Validate-Shape($Plan, [switch] $Sealed) {
 
 function Guard-Reason($Guards) {
     if ($null -eq $Guards -or @($Guards).Count -eq 0) { return $null }
-    try { $processes = @(Get-CimInstance Win32_Process) } catch { return 'Process ownership query unavailable; guarded target retained.' }
+    # Fresh name discovery is cheap; fetching command lines for every process
+    # through CIM per file can take seconds. Query ownership only for the exact
+    # candidate PIDs, without caching absence or ownership between targets.
+    try {
+        $candidateNames = @{}
+        foreach ($guard in @($Guards)) {
+            $wanted = [IO.Path]::GetFileName($guard.processName) -replace '(?i)\.exe$', ''
+            foreach ($process in [Diagnostics.Process]::GetProcessesByName($wanted)) {
+                try { if ($process.Id -ne $PID) { $candidateNames[[int] $process.Id] = $wanted } } finally { $process.Dispose() }
+            }
+        }
+        if ($candidateNames.Count -eq 0) { return $null }
+        $filter = (@($candidateNames.Keys | ForEach-Object { 'ProcessId = ' + [int] $_ })) -join ' OR '
+        $processes = @(Get-CimInstance Win32_Process -Filter $filter)
+        $returnedIds = [Collections.Generic.HashSet[int]]::new()
+        foreach ($process in $processes) {
+            if (-not $candidateNames.ContainsKey([int] $process.ProcessId) -or -not [string]::Equals(([IO.Path]::GetFileName($process.Name) -replace '(?i)\.exe$', ''), $candidateNames[[int] $process.ProcessId], [StringComparison]::OrdinalIgnoreCase)) { return 'Process identity changed during ownership query; guarded target retained.' }
+            $null = $returnedIds.Add([int] $process.ProcessId)
+        }
+        foreach ($candidateId in $candidateNames.Keys) {
+            if ($returnedIds.Contains([int] $candidateId)) { continue }
+            return 'Process ownership was not returned for a discovered process; guarded target retained.'
+        }
+    } catch { return 'Process ownership query unavailable; guarded target retained.' }
     foreach ($guard in @($Guards)) {
-        $wanted = [IO.Path]::GetFileNameWithoutExtension($guard.processName)
+        $wanted = [IO.Path]::GetFileName($guard.processName) -replace '(?i)\.exe$', ''
         foreach ($process in $processes) {
             if ($process.ProcessId -eq $PID) { continue }
-            if (-not [string]::Equals([IO.Path]::GetFileNameWithoutExtension($process.Name), $wanted, [StringComparison]::OrdinalIgnoreCase)) { continue }
+            if (-not [string]::Equals(([IO.Path]::GetFileName($process.Name) -replace '(?i)\.exe$', ''), $wanted, [StringComparison]::OrdinalIgnoreCase)) { continue }
             if (Has-Property $guard 'executableRoot') {
                 if ([string]::IsNullOrWhiteSpace($process.ExecutablePath)) { return 'Matching process executable ownership unavailable; guarded target retained.' }
                 if (Within-Path (Normalize-Path $process.ExecutablePath) $guard.executableRoot) { return 'A matching guarded process is active.' }

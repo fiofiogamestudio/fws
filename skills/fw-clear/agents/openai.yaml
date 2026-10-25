@@ -1,4 +1,4 @@
 interface:
   display_name: "FW Clear"
-  short_description: "在聊天中汇报工程清理清单，并生成可一键执行的 BAT 清理包"
-  default_prompt: "使用 $fw-clear 检查当前工程占用，在聊天窗口汇报清理候选、大小、依据和条件，并为已确认项生成一键执行的 cleanup.bat，不生成预览 BAT，先不要运行删除。"
+  short_description: "深度拆分工程占用，核对完整容量与保留证据，生成一键清理 BAT"
+  default_prompt: "使用 $fw-clear 深度盘点当前工程，逐层查明大目录和历史副本，核对全部已测字节与文件数；在聊天中汇报候选、保留项、未查明容量及依据，并为已确认项生成 cleanup.bat，先不要运行删除。"

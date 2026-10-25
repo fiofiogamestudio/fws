@@ -1,6 +1,6 @@
 ---
 name: fw-clear
-description: 盘点工程磁盘占用，在聊天中汇报有依据的清理候选并生成 Windows 一键清理 BAT 包；按明确清理授权执行和复核。不把被忽略文件自动当垃圾，不扩大到整盘或源码清理。
+description: 深度盘点工程占用，逐层拆分大目录、核对全量字节与文件数，查找可再生成缓存和历史产物；汇报候选并生成 Windows 一键清理 BAT，按明确授权执行。不把忽略文件当垃圾，不扩大到整盘或源码清理。
 ---
 
 # 工程空间清理
@@ -10,10 +10,11 @@ description: 盘点工程磁盘占用，在聊天中汇报有依据的清理候�
 ## 盘点与判定
 
 1. **固定范围。** 确认用户所指工程的实际根目录、Git 根、嵌套仓库/子模块和运行入口。先记录 Git 修改与已有暂存。检查、列出、建议在聊天中汇报，可生成 BAT，但不执行删除；用户明确只要清单时遵守该限制。“D 盘满了”不自动授权扫描或清理整盘。已明确授权的范围继续执行，不重复索取同一许可。
-2. **实测占用。** 统计目录和大文件，保留绝对路径、文件数、字节和扫描时间。可用下面的只读辅助脚本或等效工具。报告错误、跳过链接和变化中的目录；扫描期间文件会变化，逻辑文件长度不等于物理占用、实际可释放空间或重复内容。
+2. **全树实测与对账。** 默认取得完整目录 inventory；Top N 只用于展示，不能代替盘点。保留绝对路径、文件数、字节和扫描时间，区分递归总量与目录直属文件量。用不重叠的子树/直属文件桶核对全部已测字节和文件数；错误、跳过链接及变化中的目录另列未知量，不能算作零。逻辑长度不等于物理占用或可释放空间。
 3. **查明来源。** 对候选核对 Git tracked/ignored/untracked 状态、生成命令、配置引用与真实消费链；搜索回放 continuation/初态、清单、配置与工具脚本对输出路径的引用，生成产物也可能已成为下一阶段的必需输入。按再生成代价、唯一性、当前用途和进程占用分类；目录叫 `cache`、`tmp`、`old`、`backup` 或文件已被忽略都不足以证明可删。典型缓存根内可能混有验证 XML、基线日志、源模型/纹理或手工工具工程，先列可再生成的叶子目录，不能整根归为垃圾。压缩包与原目录可能是不同版本，不能只看名字判断重复。
-4. **在聊天中汇报清单。** 直接用表格或分组列表给出精确路径、实测大小、删除依据、再生成方式/代价、前置条件及建议，并汇报可清理合计。区分“可再生成”“须确认保留用途”“应保留”；同一棵树只计一次。项目外归档、其他工程和系统/工具安装目录单列为范围外，不混进可清理合计。不要只给 CSV/JSON/Markdown 报告链接代替聊天汇报；默认不另建报告文件，用户要求导出时再提供。
-5. **交付执行包。** Windows 清理任务默认为已确认可清理项生成下面的一键 BAT 包；待确认项不进入默认执行计划。用户指定了选择或已有授权时沿用该范围。核对封存的目标与聊天清单，交付 `cleanup.bat` 的绝对路径、配套文件及清理范围；不生成或交付预览 BAT，不要求用户先运行预览。检查任务不运行删除、不自动提交或推送。其他系统按其实际要求交付等效入口，用户明确只要清单时不额外生成。
+4. **持续下钻。** 按字节从大到小检查未查明项，覆盖隐藏目录、嵌套工程、历史构建/导出、录制中间帧、临时工作副本和缓存。不能因 `output`、`.local`、`Library` 混有证据或源码就整根保留后结束：保护实际必需输入与最新证据，继续检查邻近可再生成叶子。不能为了凑大容量把待确认项算成可删。具体判定、查引用和收敛标准见 [深度审查](references/deep-audit.md)。
+5. **在聊天中汇报清单。** 给出总量/文件数、可再生成、已确认退役的生成产物、条件候选、应保留、尚未查明、未测量的容量账；已测分类对齐同一范围，不重复计父子。列主要精确路径、实测大小/文件数、依据、再生成方式/代价或退役影响，以及前置条件；当前进程占用只阻止执行，不让该项从发现清单消失。范围外归档、其他工程和系统/工具安装目录单列。默认不另建面向用户的报告，临时机器账本可供多轮分析；不能只给报告链接代替聊天清单。
+6. **交付执行包。** Windows 清理任务默认为已确认可清理项生成下面的一键 BAT 包；待确认项不进入默认执行计划。用户指定了选择或已有授权时沿用该范围。核对封存的目标与聊天清单，交付 `cleanup.bat` 的绝对路径、配套文件及清理范围；不生成或交付预览 BAT，不要求用户先运行预览。检查任务不运行删除、不自动提交或推送。其他系统按其实际要求交付等效入口，用户明确只要清单时不额外生成。
 
 常见来源应这样判断：
 
@@ -27,14 +28,26 @@ description: 盘点工程磁盘占用，在聊天中汇报有依据的清理候�
 
 ## 只读扫描器
 
-需要重复统计时运行 [scripts/scan-space.mjs](scripts/scan-space.mjs)，要求 Node.js 20.10+，无需 npm 依赖。用当前技能真实目录定位脚本，勿假设工程包含 FWS：
+Windows 大工程优先用 [scripts/scan-space-native.ps1](scripts/scan-space-native.ps1)，通过缓存的原生文件元数据输出完整 inventory，避免逐文件 Node 调用耗时。跨平台/小树可用 [scripts/scan-space.mjs](scripts/scan-space.mjs)，要求 Node.js 20.10+，无需 npm 依赖。用当前技能真实目录定位脚本，勿假设工程包含 FWS：
 
 ```powershell
-node <skill-directory>/scripts/scan-space.mjs --root <absolute-project-root> --depth 2 --dirs 50 --top 30 --progress
-node <skill-directory>/scripts/scan-space.mjs --root <absolute-project-root> --depth 3 --dirs 100 --top 50 --json --progress
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File <skill-directory>/scripts/scan-space-native.ps1 -Root <absolute-project-root> -Progress
+node <skill-directory>/scripts/scan-space.mjs --root <absolute-project-root> --inventory --json --progress
+node <skill-directory>/scripts/review-space.mjs --scan <temporary-inventory.json> --limit 60
+node <skill-directory>/scripts/review-space.mjs --scan <temporary-inventory.json> --focus output --chunk-mib 256 --json
 ```
 
-脚本只读取元数据并输出到 stdout，不分类、不哈希、不写报告或删除。全树统计不随 `--depth` 缩短；该参数只控制目录明细深度，`--dirs` 保留其中最大的目录（默认 100），`--top` 控制大文件数量。目录明细含父子关系，不能相加算可释放空间。`--progress` 将约每 5 秒的进度写到 stderr，JSON stdout 保持可解析；大树可将原始 JSON 暂存到本机任务目录供分析，聊天中汇报整理后的清单，不倾倒整份扫描 JSON。它拒绝链接或重定向的根，跳过已识别的 symlink/junction、realpath 重定向目录与特殊文件，保留错误计数及最多 100 条明细。Windows 其他 reparse 类型及物理分配量仍须用原生属性/卷工具核对；不得将脚本扫描成功当作删除路径已通过安全校验。
+两种扫描器只读元数据，stdout 可重定向到工程外本机任务目录；不分类、不哈希、不删除。原生版始终输出完整 inventory，Node 版加 `--inventory` 保留每个已访问目录的直属量、递归量和错误/跳过计数；Node 的 `--depth`、`--dirs` 仅控制旧式目录展示，`--top` 控制大文件榜，`--hotspots` 控制不受深度限制的直属量榜，均不截断 inventory。详见 [账本用法与字段](references/deep-audit.md)。
+
+`review-space.mjs` 在同一份 inventory 上反复下钻，不重扫磁盘；输出不重叠账本、分类合计、审查覆盖率与未展示余量。路径名称只提供调查提示，默认全部尚未查明（Git 元数据保留），不会自动产生删除计划。已有来源证据可用 `--decisions` 记账；100% 字节对账不等于 100% 用途已查明。
+
+同目录混有重复与独有文件时，用原生 `-FileDetails` 或 Node `--file-details` 取得逐文件快照，再用 `scope: "file"` 决策分别记账；不要因一份独有文件就把整个大文件组漏出候选，也不能因大多数重复就整根删除。历史副本可用 [定向内容比较](references/deep-audit.md) 先找相同/不同/独有项。
+
+不同名称或不同层级的复制品使用 [find-duplicates.mjs](scripts/find-duplicates.mjs) 做跨目录内容比较；大树可从文件明细生成 `--files-json` 候选名单，避免重扫与无差别全盘哈希。内容相同仍须核对路径角色、保留副本与跨轮恢复链；用法和计量边界见 [跨目录与改名副本](references/deep-audit.md#跨目录与改名副本)。
+
+已结束任务的失败日志仍需保留时，可按 [日志原位压缩](references/log-compression.md) 单独评估 NTFS 无损压缩，保持原路径与全文。其实际分配量收益与删除容量分开报告，不压缩当前写入日志，不以此扩大到源码或整个目录。
+
+`-Progress` / `--progress` 约每 5 秒写 stderr。原生版检查根祖先并跳过所有带 ReparsePoint 属性的项；Node 版拒绝链接/重定向根，跳过已识别的 symlink/junction、realpath 重定向目录及特殊文件。两者保留错误计数和最多 100 条明细。完整 inventory 只代表已访问目录无截断，不代表未知路径已测量。Node 未识别的 Windows reparse 类型及物理分配量仍须原生核对；扫描成功不是删除安全校验。若扫描太慢，报告进度并更换等效元数据实现，不退回只报几个缓存。
 
 ## 生成一键 BAT 清理包
 
