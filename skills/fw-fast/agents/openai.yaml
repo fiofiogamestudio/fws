@@ -1,0 +1,4 @@
+interface:
+  display_name: "fw-fast"
+  short_description: "集中解决问题，保留必要检查，省去后续冗长的测试、整理与汇报"
+  default_prompt: "使用 $fw-fast 解决这个问题，完成必要修改和基本检查，省去后续冗长的测试、整理与汇报。"
