@@ -1,0 +1,4 @@
+interface:
+  display_name: "fw-video"
+  short_description: "从真实游戏镜头剪开发日志或玩法视频，按需配音、加字幕和制作投稿封面"
+  default_prompt: "使用 $fw-video 剪一条游戏开发短片，用实机操作讲清机制，给我可播放的成片。"

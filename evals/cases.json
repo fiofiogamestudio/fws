@@ -67,6 +67,10 @@
     {"id":"package-size-transfer","request":"ZIP 已变小但首次打开仍然很慢，请实测冷缓存启动流量，核对 Brotli 文件与服务器响应头并修好。","expected":{"skill":"fw-package-size","action":"implement"}},
     {"id":"package-size-no-publish","request":"继续上轮已授权的包体优化，把验证通过的候选纳入打包配置并交付 ZIP，不要上传或提交。","expected":{"skill":"fw-package-size","action":"implement"}},
     {"id":"package-size-not-disk-clean","request":"清理工程的可再生成缓存来释放磁盘空间，不改变最终发布包的内容。","expected":{"skill":"fw-clear","action":"clear"}},
-    {"id":"package-size-not-skill-authoring","request":"把游戏包体审计流程写成通用 skill，注册进 FWS；这次不检查或修改任何游戏包。","expected":{"skill":null,"action":"implement"}}
+    {"id":"package-size-not-skill-authoring","request":"把游戏包体审计流程写成通用 skill，注册进 FWS；这次不检查或修改任何游戏包。","expected":{"skill":null,"action":"implement"}},
+    {"id":"video-as-debug-evidence","request":"这段录像里机关只响了却没开门。请定位触发条件和原因，给我复现步骤。","expected":{"skill":"fw-debug","action":"read"}},
+    {"id":"video-devlog","request":"把旧版、AI 试拍和当前实机剪成一条开发日志，用作者口吻配旁白。","expected":{"skill":"fw-video","action":"export"}},
+    {"id":"video-late-mechanics","request":"把展示段重剪一下，直接从后期组合机关被触发之前进，保留原速操作和结果。","expected":{"skill":"fw-video","action":"export"}},
+    {"id":"video-packaging-only","request":"这条游戏短片已经定剪，只给我三条能自己粘贴的简介，沿用选好的封面与标题。","expected":{"skill":"fw-video","action":"prepare"}}
   ]
 }
