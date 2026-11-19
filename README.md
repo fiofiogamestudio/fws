@@ -44,6 +44,10 @@ FW 是项目管理入口，FWC 是框架代码。已有宿主按 `.gitmodules` �
 
 `fw-package-size` 用于 Godot、Unity、Web 等游戏的包体审计与优化，不要求接入 FW。它区分上传 ZIP、展开总量、单文件与实际启动传输，先核对目标平台当前官方规则，再按资源占用完成可回滚的压缩、重建及运行/质量核验。附带无 npm 依赖的只读 Node 审计脚本，支持目录/普通 ZIP 的大小、摘要、大项与基线比较。示例请求：`使用 $fw-package-size，检查游戏提交到目标 H5 平台有多大、是否符合现行体积规则；太大就压缩并验证。` 工程磁盘垃圾清理仍使用 `fw-clear`。
 
+## 美术风格
+
+[光影低保真 3D（Atmospheric Lo-Fi 3D）](docs/styles/atmospheric-lofi-3d.md) 用粗颗粒的三维轮廓交代空间，用投影和材质反光建立氛围。
+
 ## 本地安装
 
 Windows 双击 [start.bat](start.bat) 打开 `skills/`，并在控制台保留使用说明和安装预演命令。入口不会安装技能；`start.bat --check` 仅检查路径且不弹窗、不暂停，`start.bat --help` 显示参数。查看源码和说明无需 Node.js。
