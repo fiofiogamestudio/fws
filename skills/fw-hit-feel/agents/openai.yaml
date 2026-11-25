@@ -1,0 +1,4 @@
+interface:
+  display_name: "fw-hit-feel"
+  short_description: "调整攻击和受击的动作、卡帧、特效与镜头，用实机画面对比打击感"
+  default_prompt: "使用 $fw-hit-feel 检查当前攻击和受击表现，在保留战斗规则的前提下改善打击感，并交付实机前后对比。"

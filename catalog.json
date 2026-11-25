@@ -12,6 +12,7 @@
     { "name": "fw-ui-capture", "legacyNames": [] },
     { "name": "fw-2d-parts", "legacyNames": [] },
     { "name": "fw-clear", "legacyNames": [] },
-    { "name": "fw-package-size", "legacyNames": [] }
+    { "name": "fw-package-size", "legacyNames": [] },
+    { "name": "fw-hit-feel", "legacyNames": [] }
   ]
 }

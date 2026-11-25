@@ -1,6 +1,18 @@
 {
   "schemaVersion": 1,
   "cases": [
+    {"id":"hit-feel-analyze","request":"当前攻击已经能正常命中，但打起来很飘，受击反馈也不清楚。先看实际运行分析原因，不改代码。","expected":{"skill":"fw-hit-feel","action":"read"}},
+    {"id":"hit-feel-implement-no-fw","request":"这个 Unity 游戏没有接入 FW，请用现有简单图形改善普通攻击和受击的打击感，保持伤害与判定规则，给我同场景的实机前后动态对比。","expected":{"skill":"fw-hit-feel","action":"implement"}},
+    {"id":"hit-feel-time-layers","request":"命中时整个画面一起冻住，卡肉很生硬。请检查角色动画、粒子与镜头的时间关系，调整反馈节奏并验证连续命中后的恢复。","expected":{"skill":"fw-hit-feel","action":"implement"}},
+    {"id":"hit-feel-frequent-attacks","request":"单次攻击很有冲击，但连打时镜头摇得看不清敌人，特效还挡住对手下一招。请调整当前战斗反馈并检查高频攻击。","expected":{"skill":"fw-hit-feel","action":"implement"}},
+    {"id":"hit-feel-choice","request":"保留正式战斗，先做两套不同打击感的实际可播放演示让我选，比较后再决定采用哪套。","expected":{"skill":"fw-plan-choice","action":"demo"}},
+    {"id":"hit-feel-not-damage-bug","request":"已复现同一次攻击重复扣血，先查根因并修复；这次不调整打击感或其他表现。","expected":{"skill":"fw-debug","action":"implement"}},
+    {"id":"hit-feel-not-ui","request":"给登录按钮加点击弹跳和发光动画，不涉及游戏战斗。","expected":{"skill":null,"action":"implement"}},
+    {"id":"hit-feel-not-generic-vfx","request":"给场景瀑布加水雾和落叶粒子，保持现有镜头，不做任何攻击与受击效果。","expected":{"skill":null,"action":"implement"}},
+    {"id":"hit-feel-not-record-only","request":"只把现有攻击演示录成视频，不分析手感，也不要改代码或参数。","expected":{"skill":null,"action":"capture"}},
+    {"id":"hit-feel-not-generic-refine","request":"把现有可用的设置面板再打磨一轮，改善布局与文字层级，保留原架构。","expected":{"skill":"fw-refine","action":"implement"}},
+    {"id":"hit-feel-not-video-summary","request":"只总结这个打击感教学视频讲了什么，不修改任何项目，也不创建技能。","expected":{"skill":null,"action":"read"}},
+    {"id":"hit-feel-not-authoring","request":"把这个打击感视频内化为 FWS 的一个 skill；本轮不修改游戏或制作新的攻击演示。","expected":{"skill":null,"action":"implement"}},
     {"id":"sync-status","request":"看看当前工程 FWC 和 FWE 的本地版本与远端差多少，不要更新。","expected":{"skill":"fw-sync","action":"read"}},
     {"id":"sync-one","request":"把 FWA 接进这个空工程，我不需要编辑器和游戏框架。","expected":{"skill":"fw-sync","action":"sync"}},
     {"id":"sync-publish","request":"将已经验证的 FWS 修改提交并推送远端。","expected":{"skill":"fw-sync","action":"publish"}},
